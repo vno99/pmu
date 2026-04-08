@@ -1,0 +1,77 @@
+version: 2
+
+models:
+  - name: dim_course
+    description: >
+      Dimension des courses PMU. Une ligne par course identifiée par course_id_naturel.
+      Contient les caractéristiques descriptives de la course (discipline, distance,
+      conditions, identifiants réunion).
+    config:
+      materialized: table
+    columns:
+      - name: course_id_naturel
+        description: Clé primaire naturelle de la course (ex. 2026-03-31_R6C7)
+        tests:
+          - unique
+          - not_null
+
+      - name: date_str
+        description: Date de la course au format YYYYMMDD extrait du nom de fichier source
+        tests:
+          - not_null
+
+      - name: course_date
+        description: Date de la course castée en type date
+        tests:
+          - not_null
+
+      - name: course_heure_depart_ts
+        description: Heure de départ de la course en timestamp
+
+      - name: reunion_num_officiel
+        description: Numéro officiel de la réunion PMU
+
+      - name: course_num_ordre
+        description: Numéro d'ordre de la course
+
+      - name: course_libelle
+        description: Libellé officiel de la course
+
+      - name: course_discipline
+        description: Discipline de la course (PLAT, TROT_ATTELE, TROT_MONTE, etc.)
+        tests:
+          - not_null
+
+      - name: course_distance
+        description: Distance de la course en mètres
+        tests:
+          - not_null
+
+      - name: course_distance_unit
+        description: Unité de la distance (généralement METRE)
+
+      - name: course_statut
+        description: "Statut de la course."
+
+      - name: course_corde
+        description: Position de la corde (GAUCHE, DROITE)
+
+      - name: course_parcours
+        description: Type de parcours (PLAT, HAIES, STEEPLE, etc.)
+
+      - name: course_conditions
+        description: Conditions d'engagement de la course
+
+      - name: course_nb_declares_partants
+        description: Nombre de partants déclarés
+
+      - name: course_paris_json
+        description: JSON brut des types de paris disponibles pour cette course
+
+      - name: course_ordre_arrivee_json
+        description: JSON brut de l'ordre d'arrivée officiel
+
+      - name: source_file
+        description: Nom du fichier source ayant généré cet enregistrement
+        tests:
+          - not_null

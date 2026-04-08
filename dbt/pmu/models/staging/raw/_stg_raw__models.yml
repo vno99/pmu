@@ -1,0 +1,335 @@
+version: 2
+
+models:
+  - name: stg_raw__course
+    description: "Staging des courses PMU à partir du JSON brut programme/reunions/courses"
+    columns:
+      - name: raw_id
+        description: "Identifiant technique de la ligne raw source"
+        tests:
+          - not_null
+
+      - name: source_file
+        description: "Nom du fichier source ingéré"
+        tests:
+          - not_null
+
+      - name: file_hash
+        description: "Hash du fichier source"
+        tests:
+          - not_null
+
+      - name: ingested_at
+        description: "Horodatage d’ingestion dans la table raw"
+        tests:
+          - not_null
+
+      - name: date_str
+        description: "Date contenue dans le nom du fichier"
+        tests:
+          - not_null
+
+      - name: reunion_num_officiel
+        description: "Numéro officiel de la réunion"
+        tests:
+          - not_null
+
+      - name: reunion_num_externe
+        description: "Numéro externe de la réunion"
+
+      - name: reunion_nature
+        description: "Nature de la réunion, par exemple DIURNE ou SEMINOCTURNE"
+
+      - name: reunion_hippodrome_code
+        description: "Code hippodrome au niveau réunion"
+
+      - name: reunion_hippodrome_libelle_court
+        description: "Libellé court de l’hippodrome au niveau réunion"
+
+      - name: reunion_pays_code
+        description: "Code pays de la réunion"
+
+      - name: reunion_pays_libelle
+        description: "Libellé pays de la réunion"
+
+      - name: course_num_reunion
+        description: "Numéro de réunion porté par l’objet course"
+        tests:
+          - not_null
+
+      - name: course_num_ordre
+        description: "Numéro d’ordre de la course dans la réunion"
+        tests:
+          - not_null
+
+      - name: course_num_externe
+        description: "Numéro externe de la course"
+
+      - name: course_heure_depart
+        description: "Heure de départ de la course au format epoch millisecondes"
+
+      - name: course_libelle
+        description: "Libellé long de la course"
+
+      - name: course_libelle_court
+        description: "Libellé court de la course"
+
+      - name: course_montant_prix
+        description: "Montant du prix de la course"
+
+      - name: course_parcours
+        description: "Parcours de la course"
+
+      - name: course_distance
+        description: "Distance de la course"
+
+      - name: course_distance_unit
+        description: "Unité de distance de la course"
+
+      - name: course_corde
+        description: "Sens de corde de la course"
+
+      - name: course_discipline
+        description: "Discipline de la course"
+
+      - name: course_specialite
+        description: "Spécialité de la course"
+
+      - name: course_categorie_particularite
+        description: "Catégorie ou particularité de la course"
+
+      - name: course_condition_age
+        description: "Condition d’âge de la course"
+
+      - name: course_condition_sexe
+        description: "Condition de sexe de la course"
+
+      - name: course_nb_declares_partants
+        description: "Nombre de partants déclarés"
+
+      - name: course_montant_total_offert
+        description: "Montant total offert"
+
+      - name: course_montant_offert_1er
+        description: "Montant offert au 1er"
+
+      - name: course_montant_offert_2eme
+        description: "Montant offert au 2eme"
+
+      - name: course_montant_offert_3eme
+        description: "Montant offert au 3eme"
+
+      - name: course_montant_offert_4eme
+        description: "Montant offert au 4eme"
+
+      - name: course_montant_offert_5eme
+        description: "Montant offert au 5eme"
+
+      - name: course_conditions
+        description: "Conditions textuelles de la course"
+
+      - name: course_num_course_dedoublee
+        description: "Numéro de course dédoublée"
+
+      - name: course_statut
+        description: "Statut de la course"
+
+      - name: course_categorie_statut
+        description: "Catégorie de statut de la course"
+
+      - name: course_duree_course
+        description: "Durée de la course"
+
+      - name: course_rapports_definitifs_disponibles
+        description: "Indique si les rapports définitifs sont disponibles"
+
+      - name: course_is_arrivee_definitive
+        description: "Indique si l’arrivée est définitive"
+
+      - name: course_is_depart_imminent
+        description: "Indique si le départ est imminent"
+
+      - name: course_replay_disponible
+        description: "Indique si le replay est disponible"
+
+      - name: course_hippodrome_code
+        description: "Code hippodrome au niveau course"
+
+      - name: course_hippodrome_libelle_court
+        description: "Libellé court de l’hippodrome au niveau course"
+
+      - name: course_has_eparis
+        description: "Indique si la course a EParis"
+
+      - name: course_paris_json
+        description: "Objet JSON complet des paris"
+
+      - name: course_ordre_arrivee_json
+        description: "Objet JSON complet des arrivees"
+
+      - name: course_id_naturel
+        description: "Identifiant naturel de la course construit à partir de la date programme, de la réunion et du numéro d’ordre"
+        tests:
+          - not_null
+          - unique
+
+      - name: course_json
+        description: "Objet JSON complet de la course"
+
+  - name: stg_raw__participant
+    description: "Staging des participants PMU à partir des fichiers JSON de participants par course"
+    columns:
+      - name: raw_id
+        description: "Identifiant technique de la ligne raw source"
+        tests:
+          - not_null
+
+      - name: source_file
+        description: "Nom du fichier source ingéré"
+        tests:
+          - not_null
+
+      - name: file_hash
+        description: "Hash du fichier source"
+        tests:
+          - not_null
+
+      - name: ingested_at
+        description: "Horodatage d’ingestion dans la table raw"
+        tests:
+          - not_null
+
+      - name: course_date
+        description: "Date de course extraite du nom de fichier au format texte: YYYY-MM-DD"
+        tests:
+          - not_null
+
+      - name: reunion_num
+        description: "Numéro de réunion extrait du nom de fichier"
+        tests:
+          - not_null
+
+      - name: course_num_ordre
+        description: "Numéro d’ordre de la course extrait du nom de fichier"
+        tests:
+          - not_null
+
+      - name: course_id_naturel
+        description: "Identifiant naturel de la course construit à partir de la date, de la réunion et du numéro d’ordre"
+        tests:
+          - not_null
+
+      - name: participant_course_id_naturel
+        description: "Identifiant naturel unique du participant dans la course"
+        tests:
+          - not_null
+          - unique
+
+      - name: participant_nom
+        description: "Nom du participant"
+        tests:
+          - not_null
+
+      - name: participant_num_pmu
+        description: "Numéro PMU du participant"
+        tests:
+          - not_null
+
+      - name: participant_age
+        description: "Âge du participant"
+
+      - name: participant_sexe
+        description: "Sexe du participant"
+
+      - name: participant_race
+        description: "Race du participant"
+
+      - name: participant_statut
+        description: "Statut du participant"
+
+      - name: participant_place_corde
+        description: "Place à la corde"
+
+      - name: participant_proprietaire
+        description: "Propriétaire du participant"
+
+      - name: participant_entraineur
+        description: "Entraîneur du participant"
+
+      - name: participant_driver
+        description: "Driver ou jockey du participant"
+
+      - name: participant_driver_change
+        description: "Indique s’il y a eu un changement de driver"
+
+      - name: participant_deferre
+        description: "Le type de fer"
+
+      - name: participant_oeilleres
+        description: "Le type d'oeilleres"
+
+      - name: participant_robe_code
+        description: "Code de robe"
+
+      - name: participant_robe_libelle_court
+        description: "Libellé court de robe"
+
+      - name: participant_robe_libelle_long
+        description: "Libellé long de robe"
+
+      - name: participant_indicateur_inedit
+        description: "Indique si le participant est inédit"
+
+      - name: participant_musique
+        description: "Historique de performances du participant"
+
+      - name: participant_nombre_courses
+        description: "Nombre total de courses"
+
+      - name: participant_nombre_victoires
+        description: "Nombre total de victoires"
+
+      - name: participant_nombre_places
+        description: "Nombre total de places"
+
+      - name: participant_nombre_places_second
+        description: "Nombre total de seconde place"
+
+      - name: participant_nombre_places_troisieme
+        description: "Nombre total de troisieme place"
+
+      - name: participant_nom_pere
+        description: "Nom du père"
+
+      - name: participant_nom_mere
+        description: "Nom de la mère"
+
+      - name: participant_nom_pere_mere
+        description: "Nom du père de mère"
+
+      - name: participant_ordre_arrivee
+        description: "Ordre d’arrivée du participant"
+
+      - name: participant_jument_pleine
+        description: "Indique si la jument est pleine"
+
+      - name: participant_engagement
+        description: "Indique s’il y a engagement"
+
+      - name: participant_supplement
+        description: "Montant du supplément"
+
+      - name: participant_handicap_poids
+        description: "Handicap poids"
+
+      - name: participant_poids_condition_monte
+        description: "Poids condition monte"
+
+      - name: participant_poids_condition_monte_change
+        description: "Indique si le poids condition monte a changé"
+
+      - name: participant_allure
+        description: "Allure du participant"
+
+      - name: participant_json
+        description: "Objet JSON complet du participant"

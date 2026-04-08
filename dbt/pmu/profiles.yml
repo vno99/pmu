@@ -1,0 +1,12 @@
+pmu:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: postgres-data
+      port: 5432
+      user: user
+      password: password
+      dbname: data_db
+      schema: analytics
+      threads: 4

@@ -1,0 +1,4 @@
+ccxt==4.5.45
+pandas
+dbt-core==1.11.7
+dbt-postgres==1.10.0

@@ -1,0 +1,52 @@
+version: 2
+
+models:
+  - name: agg_hippodrome
+    description: >
+      Agrégat des statistiques de courses par combinaison (conditions, discipline, distance).
+      Utilisé comme proxy hippodrome en attendant l'ajout d'un identifiant hippodrome
+      dans int_pmu__course. Une ligne par triplet unique (conditions, discipline, distance).
+    config:
+      materialized: table
+
+    columns:
+      - name: conditions_course
+        description: Conditions d'engagement de la course (alias de course_conditions)
+        tests:
+          - not_null
+
+      - name: course_discipline
+        description: Discipline de la course (PLAT, TROT_ATTELE, TROT_MONTE, etc.)
+        tests:
+          - not_null
+
+      - name: course_distance
+        description: Distance de la course en mètres
+        tests:
+          - not_null
+
+      - name: nb_courses
+        description: Nombre de courses distinctes pour cette combinaison
+        tests:
+          - not_null
+
+      - name: nb_jours_course
+        description: Nombre de jours distincts avec au moins une course pour cette combinaison
+
+      - name: nb_participations
+        description: Nombre total de participations pour cette combinaison
+
+      - name: moy_partants_par_course
+        description: Moyenne du nombre de partants déclarés par course (arrondie à 1 décimale)
+
+      - name: max_partants
+        description: Maximum de partants déclarés sur une course de cette combinaison
+
+      - name: min_partants
+        description: Minimum de partants déclarés sur une course de cette combinaison
+
+      - name: premiere_course
+        description: Date de la première course connue pour cette combinaison
+
+      - name: derniere_course
+        description: Date de la dernière course connue pour cette combinaison

@@ -1,0 +1,41 @@
+version: 2
+
+models:
+  - name: dim_participant
+    description: >
+      Dimension des chevaux participants. Une ligne par cheval identifié par
+      participant_id_cheval. Contient les attributs stables du cheval (nom, sexe,
+      race, généalogie). La dernière apparition connue est conservée.
+    config:
+      materialized: table
+    columns:
+      - name: participant_id_cheval
+        description: >
+          Clé primaire du cheval. Valeur native idCheval de l'API PMU pour les
+          fichiers récents (format NOM-MERE-PERE). Reconstruite par normalisation
+          pour les anciens fichiers.
+        tests:
+          - unique
+          - not_null
+
+      - name: participant_nom
+        description: Nom du cheval
+        tests:
+          - not_null
+
+      - name: participant_sexe
+        description: Sexe du cheval (MALES, FEMELLES, HONGRES)
+
+      - name: participant_race
+        description: Race du cheval (PUR-SANG, TROTTEUR, etc.)
+
+      - name: participant_nom_pere_normalized
+        description: Nom du père normalisé (uppercase, suffixes pays supprimés)
+
+      - name: participant_nom_mere_normalized
+        description: Nom de la mère normalisé (uppercase, suffixes pays supprimés)
+
+      - name: source_file
+        description: Nom du fichier source ayant généré le dernier enregistrement connu
+        tests:
+          - not_null

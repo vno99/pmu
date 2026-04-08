@@ -1,0 +1,45 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: raw
+    tables:
+      - name: raw_course
+        description: "Table brute des fichiers course"
+        columns:
+          - name: id
+            tests:
+              - unique
+              - not_null
+          - name: source_file
+            tests:
+              - not_null
+          - name: file_hash
+            tests:
+              - not_null
+          - name: json_data
+            tests:
+              - not_null
+          - name: ingested_at
+            tests:
+              - not_null
+
+      - name: raw_participant
+        description: "Table brute des fichiers participant"
+        columns:
+          - name: id
+            tests:
+              - unique
+              - not_null
+          - name: source_file
+            tests:
+              - not_null
+          - name: file_hash
+            tests:
+              - not_null
+          - name: json_data
+            tests:
+              - not_null
+          - name: ingested_at
+            tests:
+              - not_null

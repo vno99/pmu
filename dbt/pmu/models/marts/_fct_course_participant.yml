@@ -1,0 +1,106 @@
+version: 2
+
+models:
+  - name: fct_course_participant
+    description: >
+      Table de faits des participations. Une ligne par couple (course, cheval).
+      Contient les mesures contextuelles à la participation (cotes, statistiques
+      historiques au moment de la course, résultat).
+      Référence dim_course via course_id_naturel et dim_participant via
+      participant_id_cheval.
+    config:
+      materialized: table
+    columns:
+      - name: course_id
+        description: >
+          FK vers dim_course (course_id_naturel côté courses).
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_course')
+              field: course_id_naturel
+
+      - name: participant_id_cheval
+        description: FK vers dim_participant (participant_id_cheval)
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_participant')
+              field: participant_id_cheval
+
+      - name: participant_num_pmu
+        description: Numéro de dossard du cheval dans cette course (1 à N)
+        tests:
+          - not_null
+
+      - name: participant_age
+        description: Age du cheval au moment de la course (en années)
+
+      - name: participant_entraineur
+        description: Nom de l'entraîneur pour cette course
+
+      - name: participant_driver
+        description: Nom du driver/jockey pour cette course
+
+      - name: participant_driver_change
+        description: Booléen indiquant si le driver a changé avant la course
+
+      - name: participant_deferre
+        description: Statut du déferrage (ANTERIEURS, POSTERIEURS, QUATRE_PIEDS, etc.)
+
+      - name: participant_oeilleres
+        description: Type d'oeillères portées (SANS_OEILLERES, OEILLERES_CLASSIQUE, etc.)
+
+      - name: participant_musique
+        description: Historique récent des résultats du cheval sous forme codée (ex. 5p3p6p)
+
+      - name: participant_statut
+        description: "Statut du participant."
+
+      - name: participant_nombre_courses
+        description: Nombre total de courses disputées par le cheval à date
+        tests:
+          - not_null
+
+      - name: participant_nombre_victoires
+        description: Nombre de victoires en carrière à date
+
+      - name: participant_nombre_places
+        description: Nombre de places (top 3) en carrière à date
+
+      - name: participant_nombre_places_second
+        description: Nombre de deuxièmes places en carrière à date
+
+      - name: participant_nombre_places_troisieme
+        description: Nombre de troisièmes places en carrière à date
+
+      - name: participant_taux_victoire
+        description: Taux de victoire calculé (nombre_victoires / nombre_courses)
+
+      - name: participant_taux_place
+        description: Taux de place calculé (nombre_places / nombre_courses)
+
+      - name: participant_ordre_arrivee
+        description: Position d'arrivée du cheval dans cette course (1 = vainqueur)
+
+      - name: participant_cote_directe
+        description: >
+          Dernière cote directe avant la course.
+
+      - name: participant_cote_reference
+        description: >
+          Cote de référence (cote d'ouverture).
+
+      - name: participant_est_favori
+        description: >
+          Booléen indiquant si le cheval est le favori de la course.
+
+      - name: is_gagnant
+        description: Booléen vrai si le cheval a terminé premier
+        tests:
+          - not_null
+
+      - name: is_top_3
+        description: Booléen vrai si le cheval a terminé dans les 3 premiers
+        tests:
+          - not_null

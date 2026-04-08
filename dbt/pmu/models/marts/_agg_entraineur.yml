@@ -1,0 +1,56 @@
+version: 2
+
+models:
+  - name: agg_entraineur
+    description: >
+      Agrégat des performances par entraîneur toutes courses confondues.
+      Une ligne par entraîneur. Construit depuis fct_course_participant jointé à dim_course.
+      Les entraîneurs null sont exclus.
+    config:
+      materialized: table
+
+    columns:
+      - name: entraineur
+        description: Nom de l'entraîneur (alias de participant_entraineur)
+        tests:
+          - unique
+          - not_null
+
+      - name: nb_participations
+        description: Nombre total de participations engagées par l'entraîneur
+        tests:
+          - not_null
+
+      - name: nb_chevaux_distincts
+        description: >
+          Nombre de chevaux distincts entraînés (basé sur participant_num_pmu).
+          Note : participant_num_pmu est le dossard, pas l'identifiant du cheval —
+          à remplacer par participant_id_cheval pour plus de précision.
+
+      - name: nb_jours_course
+        description: Nombre de jours distincts où l'entraîneur a engagé un cheval
+
+      - name: nb_victoires
+        description: Nombre total de victoires de l'entraîneur
+        tests:
+          - not_null
+
+      - name: nb_top_3
+        description: Nombre total de participations terminées dans les 3 premiers
+        tests:
+          - not_null
+
+      - name: taux_victoire_pct
+        description: Taux de victoire en pourcentage (nb_victoires / nb_participations * 100)
+
+      - name: taux_top3_pct
+        description: Taux de top 3 en pourcentage (nb_top_3 / nb_participations * 100)
+
+      - name: premiere_course
+        description: Date de la première course connue de l'entraîneur
+
+      - name: derniere_course
+        description: Date de la dernière course connue de l'entraîneur
+
+      - name: discipline_principale
+        description: Discipline la plus fréquente de l'entraîneur (mode statistique)

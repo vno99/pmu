@@ -1,0 +1,50 @@
+version: 2
+
+models:
+  - name: agg_driver
+    description: >
+      Agrégat des performances par driver (jockey/sulky) toutes courses confondues.
+      Une ligne par driver. Construit depuis fct_course_participant jointé à dim_course.
+      Les drivers null sont exclus.
+    config:
+      materialized: table
+
+    columns:
+      - name: driver
+        description: Nom du driver (alias de participant_driver)
+        tests:
+          - unique
+          - not_null
+
+      - name: nb_participations
+        description: Nombre total de participations du driver (toutes courses)
+        tests:
+          - not_null
+
+      - name: nb_jours_course
+        description: Nombre de jours distincts où le driver a couru
+
+      - name: nb_victoires
+        description: Nombre total de victoires (ordreArrivee = 1)
+        tests:
+          - not_null
+
+      - name: nb_top_3
+        description: Nombre total de participations terminées dans les 3 premiers
+        tests:
+          - not_null
+
+      - name: taux_victoire_pct
+        description: Taux de victoire en pourcentage (nb_victoires / nb_participations * 100)
+
+      - name: taux_top3_pct
+        description: Taux de top 3 en pourcentage (nb_top_3 / nb_participations * 100)
+
+      - name: premiere_course
+        description: Date de la première course connue du driver
+
+      - name: derniere_course
+        description: Date de la dernière course connue du driver
+
+      - name: discipline_principale
+        description: Discipline la plus fréquente du driver (mode statistique)
