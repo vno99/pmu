@@ -4,8 +4,7 @@ WITH course_participant AS (
 
 course AS (
     SELECT * FROM {{ ref('dim_course') }}
-),
-
+)
 
 SELECT
 

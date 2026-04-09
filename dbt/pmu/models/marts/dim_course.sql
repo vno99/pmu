@@ -1,7 +1,6 @@
 WITH src AS (
     SELECT * FROM {{ ref('int_pmu__course') }}
-),
-
+)
 
 SELECT
 

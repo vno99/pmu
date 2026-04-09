@@ -1,7 +1,6 @@
 WITH src AS (
     SELECT * FROM {{ ref('int_pmu__participant') }}
-),
-
+)
 
 SELECT DISTINCT ON (participant_id_cheval)
 

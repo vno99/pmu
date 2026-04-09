@@ -4,8 +4,7 @@ WITH courses AS (
 
 participants AS (
     SELECT * FROM {{ ref('int_pmu__participant') }}
-),
-
+)
 
 SELECT
 
