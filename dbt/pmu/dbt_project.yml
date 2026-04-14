@@ -23,7 +23,9 @@ models:
     
     intermediate:
       +schema: intermediate
-      +materialized: view
+      +materialized: table
+      +indexes:
+        - columns: ['course_date']
     
     marts:
       +schema: marts

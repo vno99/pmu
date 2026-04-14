@@ -1,7 +1,7 @@
 from datetime import datetime
 
-from airflow.providers.standard.operators.trigger_dagrun import TriggerDagRunOperator
 from airflow.providers.standard.operators.python import PythonOperator
+from airflow.providers.standard.operators.trigger_dagrun import TriggerDagRunOperator
 from airflow.sdk import Param, dag
 from pendulum import timezone
 
@@ -46,6 +46,17 @@ def pmu_daily_call():
         conf={"current_date": "{{ params.current_date }}"}
     )
 
+    pmu_dbt_raw_to_intermediate = TriggerDagRunOperator(
+        task_id="pmu_dbt_raw_to_intermediate",
+        trigger_dag_id="pmu_dbt_raw_to_intermediate",
+        wait_for_completion=True,
+        poke_interval=30,
+        allowed_states=["success"],
+        failed_states=["failed"],
+        deferrable=True,
+        conf={"current_date": "{{ params.current_date }}"}
+    )
+
     pmu_dbt_int_to_mart = TriggerDagRunOperator(
         task_id="pmu_dbt_int_to_mart",
         trigger_dag_id="pmu_dbt_int_to_mart",
@@ -54,8 +65,9 @@ def pmu_daily_call():
         allowed_states=["success"],
         failed_states=["failed"],
         deferrable=True,
+        conf={"current_date": "{{ params.current_date }}"}
     )
 
-    api_call >> pmu_daily_insert_raw >> pmu_dbt_int_to_mart
+    api_call >> pmu_daily_insert_raw >> pmu_dbt_raw_to_intermediate >> pmu_dbt_int_to_mart
 
 pmu_daily_call()

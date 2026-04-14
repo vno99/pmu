@@ -1,0 +1,126 @@
+version: 2
+
+models:
+  - name: int_pmu__course
+    description: "Modèle intermediate des courses PMU, dérivé du staging raw course"
+    config:
+      contract:
+        enforced: true
+
+    columns:
+      - name: course_id_naturel
+        description: "Identifiant naturel unique de la course, incluant la date, la réunion et le numéro de course"
+        data_type: varchar
+        constraints:
+          - type: primary_key
+        tests:
+          - not_null
+          - unique
+
+      - name: raw_id
+        description: "Identifiant technique de la ligne de staging source"
+        data_type: bigint
+        tests:
+          - not_null
+
+      - name: source_file
+        description: "Nom du fichier source à l'origine de la donnée"
+        data_type: varchar
+        tests:
+          - not_null
+
+      - name: file_hash
+        description: "Hash du fichier source"
+        data_type: varchar
+        tests:
+          - not_null
+
+      - name: ingested_at
+        description: "Horodatage d'ingestion de la donnée brute"
+        data_type: timestamptz
+        tests:
+          - not_null
+
+      - name: date_str
+        description: "Date contenue dans le nom du fichier"
+        data_type: varchar
+
+      - name: course_heure_depart_ts
+        description: "Timestamp de départ de la course"
+        data_type: timestamptz
+
+      - name: course_date
+        description: "Date de la course"
+        data_type: date
+
+      - name: reunion_num_officiel
+        description: "Numéro officiel de la réunion"
+        data_type: integer
+
+      - name: reunion_num_externe
+        description: "Numéro externe de la réunion"
+        data_type: integer
+
+      - name: course_num_reunion
+        description: "Numéro de réunion de la course"
+        data_type: integer
+        tests:
+          - not_null
+
+      - name: course_num_ordre
+        description: "Numéro d'ordre de la course dans la réunion"
+        data_type: integer
+        tests:
+          - not_null
+
+      - name: course_num_externe
+        description: "Numéro externe de la course"
+        data_type: integer
+
+      - name: course_libelle
+        description: "Libellé long de la course"
+        data_type: varchar
+
+      - name: course_discipline
+        description: "Discipline de la course"
+        data_type: varchar
+
+      - name: course_distance
+        description: "Distance de la course"
+        data_type: integer
+
+      - name: course_distance_unit
+        description: "Unité de distance de la course"
+        data_type: varchar
+
+      - name: course_nb_declares_partants
+        description: "Nombre de partants déclarés"
+        data_type: integer
+
+      - name: course_statut
+        description: "Statut de la course"
+        data_type: varchar
+
+      - name: course_corde
+        description: "Sens de corde"
+        data_type: varchar
+
+      - name: course_parcours
+        description: "Parcours de la course"
+        data_type: varchar
+
+      - name: course_conditions
+        description: "Conditions textuelles de participation à la course"
+        data_type: varchar
+
+      - name: course_paris_json
+        description: "Tableau JSON des paris disponibles sur la course"
+        data_type: jsonb
+
+      - name: course_ordre_arrivee_json
+        description: "Ordre d'arrivée brut au format JSON"
+        data_type: jsonb
+
+      - name: course_json
+        description: "Objet JSON complet de la course"
+        data_type: jsonb

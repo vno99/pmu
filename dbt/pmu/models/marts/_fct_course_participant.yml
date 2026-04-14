@@ -28,6 +28,10 @@ models:
               to: ref('dim_participant')
               field: participant_id_cheval
 
+      - name: course_date
+        description: "Date de la course"
+        data_type: date
+
       - name: participant_num_pmu
         description: Numéro de dossard du cheval dans cette course (1 à N)
         tests:

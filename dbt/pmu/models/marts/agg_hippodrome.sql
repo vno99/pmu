@@ -24,8 +24,8 @@ SELECT
     min(course_nb_declares_partants) AS min_partants,
 
     -- infos utiles
-    min(course_date) AS premiere_course,
-    max(course_date) AS derniere_course
+    min(c.course_date) AS premiere_course,
+    max(c.course_date) AS derniere_course
 
 FROM course_participant cp
     JOIN course c ON c.course_id_naturel = cp.course_id

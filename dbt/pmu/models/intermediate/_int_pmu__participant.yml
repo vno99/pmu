@@ -1,112 +1,25 @@
 version: 2
 
 models:
-  - name: int_pmu__course
-    description: "Modèle intermediate des courses PMU, dérivé du staging raw course"
-
-    columns:
-      - name: course_id_naturel
-        description: "Identifiant naturel unique de la course, incluant la date, la réunion et le numéro de course"
-        tests:
-          - not_null
-          - unique
-
-      - name: raw_id
-        description: "Identifiant technique de la ligne de staging source"
-        tests:
-          - not_null
-
-      - name: source_file
-        description: "Nom du fichier source à l'origine de la donnée"
-        tests:
-          - not_null
-
-      - name: file_hash
-        description: "Hash du fichier source"
-        tests:
-          - not_null
-
-      - name: ingested_at
-        description: "Horodatage d'ingestion de la donnée brute"
-        tests:
-          - not_null
-
-      - name: date_str
-        description: "Date contenue dans le nom du fichier"
-
-      - name: course_heure_depart_ts
-        description: "Timestamp de départ de la course"
-
-      - name: course_date
-        description: "Date de la course"
-
-      - name: reunion_num_officiel
-        description: "Numéro officiel de la réunion"
-
-      - name: reunion_num_externe
-        description: "Numéro externe de la réunion"
-
-      - name: course_num_reunion
-        description: "Numéro de réunion de la course"
-        tests:
-          - not_null
-
-      - name: course_num_ordre
-        description: "Numéro d'ordre de la course dans la réunion"
-        tests:
-          - not_null
-
-      - name: course_num_externe
-        description: "Numéro externe de la course"
-
-      - name: course_libelle
-        description: "Libellé long de la course"
-
-      - name: course_discipline
-        description: "Discipline de la course"
-
-      - name: course_distance
-        description: "Distance de la course"
-
-      - name: course_distance_unit
-        description: "Unité de distance de la course"
-
-      - name: course_nb_declares_partants
-        description: "Nombre de partants déclarés"
-
-      - name: course_statut
-        description: "Statut de la course"
-
-      - name: course_corde
-        description: "Sens de corde"
-
-      - name: course_parcours
-        description: "Parcours de la course"
-
-      - name: course_conditions
-        description: "Conditions textuelles de participation à la course"
-
-      - name: course_paris_json
-        description: "Tableau JSON des paris disponibles sur la course"
-
-      - name: course_ordre_arrivee_json
-        description: "Ordre d'arrivée brut au format JSON"
-
-      - name: course_json
-        description: "Objet JSON complet de la course"
-
   - name: int_pmu__participant
     description: "Modèle intermediate des participants PMU, dérivé du staging raw participant"
+    config:
+      contract:
+        enforced: true
 
     columns:
       - name: participant_course_id_naturel
         description: "Identifiant naturel unique du participant dans une course"
+        data_type: varchar
+        constraints:
+          - type: primary_key
         tests:
           - not_null
           - unique
 
       - name: course_id_naturel
         description: "Identifiant naturel de la course du participant"
+        data_type: varchar
         tests:
           - not_null
           - relationships:
@@ -115,126 +28,162 @@ models:
 
       - name: raw_id
         description: "Identifiant technique de la ligne de staging source"
+        data_type: bigint
         tests:
           - not_null
 
       - name: source_file
         description: "Nom du fichier source à l'origine de la donnée"
+        data_type: varchar
         tests:
           - not_null
 
       - name: file_hash
         description: "Hash du fichier source"
+        data_type: varchar
         tests:
           - not_null
 
       - name: ingested_at
         description: "Horodatage d'ingestion de la donnée brute"
+        data_type: timestamptz
         tests:
           - not_null
 
       - name: course_date
         description: "Date de la course"
+        data_type: date
 
       - name: reunion_num
         description: "Numéro de réunion extrait et normalisé"
+        data_type: integer
         tests:
           - not_null
 
       - name: course_num_ordre
         description: "Numéro d'ordre de la course"
+        data_type: integer
         tests:
           - not_null
 
       - name: participant_num_pmu
         description: "Numéro PMU du participant"
+        data_type: integer
         tests:
           - not_null
 
       - name: participant_id_cheval
         description: "Id du cheval"
+        data_type: varchar
         tests:
           - not_null
 
       - name: participant_nom
         description: "Nom du participant"
+        data_type: varchar
         tests:
           - not_null
 
       - name: participant_age
         description: "Âge du participant"
+        data_type: integer
 
       - name: participant_sexe
         description: "Sexe du participant"
+        data_type: varchar
 
       - name: participant_nom_mere_normalized
         description: "Nom de la mere du participant"
+        data_type: varchar
 
       - name: participant_nom_pere_normalized
         description: "Nom de la pere du participant"
+        data_type: varchar
 
       - name: participant_race
         description: "Race du participant"
+        data_type: varchar
 
       - name: participant_entraineur
         description: "Nom de l'entraîneur"
+        data_type: varchar
 
       - name: participant_driver
         description: "Nom du driver ou jockey"
+        data_type: varchar
 
       - name: participant_driver_change
         description: "Indique s'il y a eu un changement de driver"
+        data_type: boolean
 
       - name: participant_deferre
         description: "Information de ferrure ou déferrage du participant"
+        data_type: varchar
 
       - name: participant_oeilleres
         description: "Information sur le port d'oeillères"
+        data_type: varchar
 
       - name: participant_musique
         description: "Historique synthétique des performances"
+        data_type: varchar
 
       - name: participant_statut
         description: "Statut du participant"
+        data_type: varchar
 
       - name: participant_nombre_courses
         description: "Nombre de courses disputées"
+        data_type: integer
 
       - name: participant_nombre_victoires
         description: "Nombre de victoires"
+        data_type: integer
 
       - name: participant_nombre_places
         description: "Nombre total de placés"
+        data_type: integer
 
       - name: participant_nombre_places_second
         description: "Nombre de deuxièmes places"
+        data_type: integer
 
       - name: participant_nombre_places_troisieme
         description: "Nombre de troisièmes places"
+        data_type: integer
 
       - name: participant_ordre_arrivee
         description: "Position finale à l'arrivée"
+        data_type: integer
 
       - name: participant_cote_directe
         description: "Cote directe"
+        data_type: numeric(5, 1)
 
       - name: participant_cote_reference
         description: "Cote de reference"
+        data_type: numeric(5, 1)
 
       - name: participant_est_favori
         description: "Indique si le participant est favori"
+        data_type: boolean
 
       - name: participant_taux_victoire
         description: "Taux de victoire calculé comme victoires / nombre de courses"
+        data_type: numeric(24, 20)
 
       - name: participant_taux_place
         description: "Taux de places calculé comme places / nombre de courses"
+        data_type: numeric(24, 20)
 
       - name: is_gagnant
         description: "Indique si le participant a terminé premier"
+        data_type: boolean
 
       - name: is_top_3
         description: "Indique si le participant a terminé dans les trois premiers"
+        data_type: boolean
 
       - name: participant_json
         description: "Objet JSON complet du participant"
+        data_type: jsonb

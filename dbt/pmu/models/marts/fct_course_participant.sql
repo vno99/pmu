@@ -1,9 +1,24 @@
+{{ config(
+    materialized='incremental',
+    unique_key=['course_id', 'participant_id_cheval'],
+    on_schema_change='fail'
+) }}
+
 WITH courses AS (
     SELECT * FROM {{ ref('int_pmu__course') }}
+
+    {% if is_incremental() %}
+        {{ log("Dans if") }}
+        WHERE course_date = '{{ var("current_date", modules.datetime.date.today() | string) }}'::DATE
+    {% endif %}
 ),
 
 participants AS (
-    SELECT * FROM {{ ref('int_pmu__participant') }}
+    SELECT * FROM {{ ref('int_pmu__participant', info=True) }}
+
+    {% if is_incremental() %}
+        WHERE course_date = '{{ var("current_date", modules.datetime.date.today() | string) }}'::DATE
+    {% endif %}
 )
 
 SELECT
@@ -11,6 +26,7 @@ SELECT
     -- clés
     c.course_id_naturel AS course_id,
     p.participant_id_cheval,
+    c.course_date,
 
     -- dimensions participant
     p.participant_num_pmu,

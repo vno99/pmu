@@ -1,5 +1,16 @@
+{{ config(
+    materialized='incremental',
+    unique_key=['course_id_naturel'],
+    on_schema_change='fail'
+) }}
+
 WITH src AS (
     SELECT * FROM {{ ref('stg_raw__course') }}
+
+    {% if is_incremental() %}
+        {{ log("Dans if") }}
+        WHERE date_str = '{{ var("current_date", modules.datetime.date.today() | string) }}'
+    {% endif %}
 )
 
 SELECT
