@@ -131,6 +131,7 @@ services:
       - postgres-data-volume:/var/lib/postgresql/data
     ports:
       - "5433:5432"
+    restart: always
 
   redis:
     # Redis is limited to 7.2-bookworm due to licencing change
