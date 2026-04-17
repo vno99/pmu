@@ -1,0 +1,160 @@
+version: 2
+
+models:
+  - name: stg_raw__participant
+    description: "Staging des participants PMU à partir des fichiers JSON de participants par course"
+    columns:
+      - name: raw_id
+        description: "Identifiant technique de la ligne raw source"
+        tests:
+          - not_null
+
+      - name: source_file
+        description: "Nom du fichier source ingéré"
+        tests:
+          - not_null
+
+      - name: file_hash
+        description: "Hash du fichier source"
+        tests:
+          - not_null
+
+      - name: ingested_at
+        description: "Horodatage d’ingestion dans la table raw"
+        tests:
+          - not_null
+
+      - name: course_date
+        description: "Date de course extraite du nom de fichier au format texte: YYYY-MM-DD"
+        tests:
+          - not_null
+
+      - name: reunion_num
+        description: "Numéro de réunion extrait du nom de fichier"
+        tests:
+          - not_null
+
+      - name: course_num_ordre
+        description: "Numéro d’ordre de la course extrait du nom de fichier"
+        tests:
+          - not_null
+
+      - name: course_id_naturel
+        description: "Identifiant naturel de la course construit à partir de la date, de la réunion et du numéro d’ordre"
+        tests:
+          - not_null
+
+      - name: participant_course_id_naturel
+        description: "Identifiant naturel unique du participant dans la course"
+        tests:
+          - not_null
+          - unique
+
+      - name: participant_nom
+        description: "Nom du participant"
+        tests:
+          - not_null
+
+      - name: participant_num_pmu
+        description: "Numéro PMU du participant"
+        tests:
+          - not_null
+
+      - name: participant_age
+        description: "Âge du participant"
+
+      - name: participant_sexe
+        description: "Sexe du participant"
+
+      - name: participant_race
+        description: "Race du participant"
+
+      - name: participant_statut
+        description: "Statut du participant"
+
+      - name: participant_place_corde
+        description: "Place à la corde"
+
+      - name: participant_proprietaire
+        description: "Propriétaire du participant"
+
+      - name: participant_entraineur
+        description: "Entraîneur du participant"
+
+      - name: participant_driver
+        description: "Driver ou jockey du participant"
+
+      - name: participant_driver_change
+        description: "Indique s’il y a eu un changement de driver"
+
+      - name: participant_deferre
+        description: "Le type de fer"
+
+      - name: participant_oeilleres
+        description: "Le type d'oeilleres"
+
+      - name: participant_robe_code
+        description: "Code de robe"
+
+      - name: participant_robe_libelle_court
+        description: "Libellé court de robe"
+
+      - name: participant_robe_libelle_long
+        description: "Libellé long de robe"
+
+      - name: participant_indicateur_inedit
+        description: "Indique si le participant est inédit"
+
+      - name: participant_musique
+        description: "Historique de performances du participant"
+
+      - name: participant_nombre_courses
+        description: "Nombre total de courses"
+
+      - name: participant_nombre_victoires
+        description: "Nombre total de victoires"
+
+      - name: participant_nombre_places
+        description: "Nombre total de places"
+
+      - name: participant_nombre_places_second
+        description: "Nombre total de seconde place"
+
+      - name: participant_nombre_places_troisieme
+        description: "Nombre total de troisieme place"
+
+      - name: participant_nom_pere
+        description: "Nom du père"
+
+      - name: participant_nom_mere
+        description: "Nom de la mère"
+
+      - name: participant_nom_pere_mere
+        description: "Nom du père de mère"
+
+      - name: participant_ordre_arrivee
+        description: "Ordre d’arrivée du participant"
+
+      - name: participant_jument_pleine
+        description: "Indique si la jument est pleine"
+
+      - name: participant_engagement
+        description: "Indique s’il y a engagement"
+
+      - name: participant_supplement
+        description: "Montant du supplément"
+
+      - name: participant_handicap_poids
+        description: "Handicap poids"
+
+      - name: participant_poids_condition_monte
+        description: "Poids condition monte"
+
+      - name: participant_poids_condition_monte_change
+        description: "Indique si le poids condition monte a changé"
+
+      - name: participant_allure
+        description: "Allure du participant"
+
+      - name: participant_json
+        description: "Objet JSON complet du participant"
