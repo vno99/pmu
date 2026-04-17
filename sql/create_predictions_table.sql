@@ -2,7 +2,7 @@ CREATE SCHEMA IF NOT EXISTS analytics_marts;
 
 CREATE TABLE IF NOT EXISTS analytics_marts.dim_prediction (
     race_id VARCHAR(50) NOT NULL,
-    horse_id INT NOT NULL,
+    horse_id VARCHAR(100) NOT NULL,
     participant_num_pmu INT,
     pred_score NUMERIC(10, 5),
     prediction_date DATE NOT NULL,

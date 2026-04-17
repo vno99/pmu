@@ -9,24 +9,23 @@ from airflow.sdk import Param, dag
 
 from services.service_pmu import _get_dates
 
+from dateutil import tz
+
+local_tz = tz.gettz("Europe/Paris")
+
 default_args = {
     "owner": "airflow",
-    "start_date": datetime(2026, 4, 1),
+    "start_date": datetime(2026, 4, 1, tzinfo=local_tz),
     "retries": 1,
     "retry_delay": timedelta(minutes=5),
 }
 
-API_HOST = os.getenv("PMU_API_HOST", "http://host.docker.internal:7860/predict")
+API_HOST = os.getenv("PMU_API_HOST", "http://host.docker.internal:7860/")
 API_URL = os.getenv("PMU_API_URL", "predict")
 DB_CONN_ID = os.getenv("DB_CONN_ID", "data_db")
 TABLE_NAME = os.getenv("TABLE_NAME", "analytics_marts.dim_prediction")
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-console_handler = logging.StreamHandler()
-console_handler.setFormatter(logging.Formatter('%(asctime)s [%(levelname)s] %(message)s'))
-logger.addHandler(console_handler)
-
 
 def predict(current_date):
     api_url = f"{API_HOST}{API_URL}"
@@ -58,7 +57,7 @@ def predict(current_date):
         logger.error("Réponse API vide")
         raise ValueError("Aucune prédiction reçue de l'API")
 
-    logger.info(f"Reception de {len(data["count"])} previsions")
+    logger.info(f"Reception de {data["count"]} prévisions")
 
 
     return data
@@ -83,8 +82,8 @@ def save_predictions_to_db(ti):
         logger.info("La liste des predictions est vide")
         return
 
-    logger.info(f"Traitement de {len(predictions_data["count"])} previsions...")
-    prediction_date = datetime.strptime(predictions_data["course_date"], '%Y-%m-%d').date()
+    logger.info(f"Traitement de {predictions_data["count"]} previsions...")
+    prediction_date = datetime.strptime(predictions_data["course_date"], '%d%m%Y').date()
 
     rows_to_insert = []
     for r in records:
@@ -108,17 +107,13 @@ def save_predictions_to_db(ti):
     
     target_fields = ['race_id', 'horse_id', 'participant_num_pmu', 'pred_score', 'prediction_date', 'model_run']
 
-    hook.insert_rows_with_transaction(
+    hook.insert_rows(
         table=TABLE_NAME,
         rows=rows_to_insert,
         target_fields=target_fields,
-        on_conflict_action='update',
-        conflict_target=['race_id', 'horse_id'],
-        if_exists={
-            'pred_score': 'pred_score', 
-            'model_run': 'model_run',
-            'updated_at': 'CURRENT_TIMESTAMP'
-        }
+        commit_every=1000,
+        replace=True,
+        replace_index=["race_id", "horse_id"],
     )
 
     logger.info(f"Insertion / Mise à jour réussie de {len(rows_to_insert)} predictions")
@@ -126,6 +121,7 @@ def save_predictions_to_db(ti):
 
 @dag(dag_id="pmu_daily_predict",
      default_args=default_args, 
+     schedule="0 4 * * *",
      catchup=False,
      tags=["pmu", "dbt"],
      params={
