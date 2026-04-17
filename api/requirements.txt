@@ -1,0 +1,17 @@
+fastapi[standard]
+
+pydantic 
+typing 
+pandas 
+openpyxl 
+mlflow==3.5.1
+boto3 
+scikit-learn==1.7.2
+python-multipart
+fsspec
+s3fs
+gunicorn 
+pvlib
+lightgbm
+psycopg2-binary
+pyarrow
