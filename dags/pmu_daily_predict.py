@@ -3,13 +3,13 @@ import os
 from datetime import datetime, timedelta
 
 import requests
+from airflow.exceptions import AirflowSkipException
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.providers.standard.operators.python import PythonOperator
 from airflow.sdk import Param, dag
+from dateutil import tz
 
 from services.service_pmu import _get_dates
-
-from dateutil import tz
 
 local_tz = tz.gettz("Europe/Paris")
 
@@ -53,12 +53,11 @@ def predict(current_date):
 
     data = response.json()
 
-    if not data:
+    if not data or len(data["prediction"]) == 0:
         logger.error("Réponse API vide")
-        raise ValueError("Aucune prédiction reçue de l'API")
+        raise AirflowSkipException("Aucune prédiction reçue de l'API")
 
     logger.info(f"Reception de {data["count"]} prévisions")
-
 
     return data
 

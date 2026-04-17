@@ -17,11 +17,13 @@ LISTE_PARTICIPANTS_COURSE = ""
 
 OUTPUT_DIR = "/data/pmu/"
 
+DATE_FORMAT_OUTPUT = "%d%m%Y"
+
 def _get_dates(une_date):
     str_date = (
-        datetime.now().strftime("%d%m%Y") 
+        datetime.now().strftime(DATE_FORMAT_OUTPUT) 
         if une_date in (None, "None", "null", "") 
-        else une_date.strftime("%d%m%Y") 
+        else une_date.strftime(DATE_FORMAT_OUTPUT) 
         if isinstance(une_date, datetime) 
         else une_date
     )
@@ -107,7 +109,7 @@ def _get_reunions_courses(une_date):
 
     
 def _get_full_data_from(start_date_var="09032013"):
-    start_date = datetime.strptime(start_date_var, "%d%m%Y")
+    start_date = datetime.strptime(start_date_var, DATE_FORMAT_OUTPUT)
     end_date = datetime.today()
 
     current_date = start_date
@@ -134,7 +136,7 @@ def _get_full_data_from(start_date_var="09032013"):
 
 def _get_data(current_date: str, **context):
     if current_date in ["None", "null", ""]:
-        current_date = context["logical_date"].strftime("%d%m%Y")
+        current_date = context["logical_date"].strftime(DATE_FORMAT_OUTPUT)
 
     fetch_course_pmu(current_date)
     time.sleep(0.15)
