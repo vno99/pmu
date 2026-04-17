@@ -148,44 +148,5 @@ def _get_data(current_date: str, **context):
         time.sleep(0.15)
 
 
-
-# 09032013
-if __name__ == "__main__":
-    # fetch_course_pmu("29032026")
-    # fetch_participants(1, 1, "29032026")
-
-    # fetch_course_pmu("29032026")
-
-
-    # reunions_courses = _getReunionsCourses("29032026")
-
-    # for i, a_reunion_course in enumerate(reunions_courses):
-    #     num_reunion, num_course = a_reunion_course
-
-    #     fetch_participants(num_reunion, num_course, "29032026")
-    #     time.sleep(0.5)
-
-    """
-    DATE0 = "09032013"
-    start_date = datetime.strptime(DATE0, "%d%m%Y")
-    end_date = datetime.today()
-
-    current_date = start_date
-
-    while current_date < end_date:
-        str_date, date_filename = _get_dates(current_date)
-        fetch_course_pmu(current_date)
-        time.sleep(0.5)
-
-        reunions_courses = _get_reunions_courses(current_date)
-
-        for i, a_reunion_course in enumerate(reunions_courses):
-            num_reunion, num_course = a_reunion_course
-
-            fetch_participants_pmu(num_reunion, num_course, current_date)
-            time.sleep(0.5)
-
-        current_date += timedelta(days=1)
-    """
-
-    _get_full_data_from("14082025")
+# if __name__ == "__main__":
+#     _get_full_data_from("14082025")

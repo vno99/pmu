@@ -5,7 +5,7 @@ from datetime import datetime
 from airflow.providers.standard.operators.bash import BashOperator
 from airflow.sdk import Param, dag, task
 
-from services.api_pmu import _get_dates
+from services.service_pmu import _get_dates
 
 default_args = {
     "owner": "airflow",
@@ -18,6 +18,7 @@ STEPS = {
 }
 
 @dag(dag_id="pmu_dbt_raw_to_intermediate",
+     description="Exécute les modèles dbt de staging puis d'intermediate, avec les tests associés, à partir des données PMU de la couche raw",
      default_args=default_args, 
      catchup=False,
      tags=["pmu", "dbt"],
@@ -66,8 +67,8 @@ def pmu_dbt_raw_to_intermediate():
         bash_command=f"dbt test {DBT_DIR} --select {STEPS['int']}"
     )
 
-    current_date = start()
+    start_task = start()
 
-    current_date >> dbt_run_stg >> dbt_test_stg >> dbt_run_int >> dbt_test_int
+    start_task >> dbt_run_stg >> dbt_test_stg >> dbt_run_int >> dbt_test_int
 
 pmu_dbt_raw_to_intermediate()

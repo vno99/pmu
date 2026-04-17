@@ -1,10 +1,9 @@
 import logging
-from datetime import datetime
 
 from airflow.providers.standard.operators.bash import BashOperator
 from airflow.sdk import Param, dag, task
 
-from services.api_pmu import _get_dates
+from services.service_pmu import _get_dates
 
 default_args = {
     "owner": "airflow",
@@ -17,6 +16,7 @@ STEPS = {
 
 
 @dag(dag_id="pmu_dbt_int_to_mart",
+     description="Exécute les modèles dbt de la couche mart à partir des données PMU intermediate",
      default_args=default_args, 
      catchup=False,
      tags=["pmu", "dbt"],
@@ -55,8 +55,8 @@ def pmu_dbt_int_to_mart():
         bash_command=f"dbt test {DBT_DIR} --select {STEPS['marts']} --vars '{dbt_vars}'"
     )
 
-    current_date = start()
+    start_task = start()
 
-    current_date >> dbt_run_marts >> dbt_test_marts
+    start_task >> dbt_run_marts >> dbt_test_marts
 
 pmu_dbt_int_to_mart()
