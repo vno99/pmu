@@ -8,7 +8,6 @@ WITH src AS (
     SELECT * FROM {{ ref('stg_raw__participant') }}
 
     {% if is_incremental() %}
-        {{ log("Dans if") }}
         WHERE course_date = '{{ var("current_date", modules.datetime.date.today() | string) }}'::DATE
     {% endif %}
 ),

@@ -1,7 +1,5 @@
 import logging
 
-from datetime import datetime
-
 from airflow.providers.standard.operators.bash import BashOperator
 from airflow.sdk import Param, dag, task
 

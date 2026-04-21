@@ -17,24 +17,27 @@ LISTE_PARTICIPANTS_COURSE = ""
 
 OUTPUT_DIR = "/data/pmu/"
 
-DATE_FORMAT_OUTPUT = "%d%m%Y"
+STR_DATE_FORMAT_OUTPUT = "%d%m%Y"
+FILE_DATE_FORMAT_OUTPUT = "%Y%m%d"
 
 def _get_dates(une_date):
-    str_date = (
-        datetime.now().strftime(DATE_FORMAT_OUTPUT) 
-        if une_date in (None, "None", "null", "") 
-        else une_date.strftime(DATE_FORMAT_OUTPUT) 
-        if isinstance(une_date, datetime) 
-        else une_date
-    )
+    now = datetime.now()
 
-    day = str_date[:2]
-    month = str_date[2:4]
-    year = str_date[4:]
+    if une_date in (None, "None", "null", ""):
+        date_obj = now
+    elif isinstance(une_date, datetime) :
+        date_obj = une_date
+    elif isinstance(une_date, str):
+        try:
+            date_obj = datetime.strptime(une_date, STR_DATE_FORMAT_OUTPUT)
+        except (ValueError, TypeError):
+            logging.error(f"Format de date invalide {une_date}")
 
-    date_filename = f"{year}{month}{day}"
+            date_obj = now
+    else:
+        date_obj = now
 
-    return (str_date, date_filename)
+    return (date_obj.strftime(STR_DATE_FORMAT_OUTPUT), date_obj.strftime(FILE_DATE_FORMAT_OUTPUT))
 
 
 def fetch_course_pmu(une_date):
@@ -109,7 +112,7 @@ def _get_reunions_courses(une_date):
 
     
 def _get_full_data_from(start_date_var="09032013"):
-    start_date = datetime.strptime(start_date_var, DATE_FORMAT_OUTPUT)
+    start_date = datetime.strptime(start_date_var, STR_DATE_FORMAT_OUTPUT)
     end_date = datetime.today()
 
     current_date = start_date
@@ -136,7 +139,7 @@ def _get_full_data_from(start_date_var="09032013"):
 
 def _get_data(current_date: str, **context):
     if current_date in ["None", "null", ""]:
-        current_date = context["logical_date"].strftime(DATE_FORMAT_OUTPUT)
+        current_date = context["logical_date"].strftime(STR_DATE_FORMAT_OUTPUT)
 
     fetch_course_pmu(current_date)
     time.sleep(0.15)

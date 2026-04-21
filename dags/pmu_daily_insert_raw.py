@@ -2,7 +2,6 @@ import hashlib
 import json
 import logging
 import os
-from datetime import datetime
 from pathlib import Path
 
 from airflow.exceptions import AirflowException
@@ -141,8 +140,10 @@ def pmu_daily_insert_raw():
             or context["dag_run"].conf.get("current_date")
             or context["logical_date"].strftime("%d%m%Y")
         )
-        logger.info(f"Date résolue : {current_date}")
-        return current_date
+        logging.info(f"Date résolue : {current_date}")
+
+        date_str, _ = _get_dates(current_date)
+        return {"current_date": date_str}
 
     @task(task_id="load_raw_courses")
     def load_raw_courses(a_date):

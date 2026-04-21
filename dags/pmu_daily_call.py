@@ -23,6 +23,7 @@ default_args = {
      default_args=default_args, 
      schedule="0 3 * * *",
      catchup=False,
+     max_active_runs=1,
      tags=["pmu", "dbt"],
      params={
          "current_date": Param(
@@ -46,7 +47,7 @@ def pmu_daily_call():
     pmu_daily_insert_raw = TriggerDagRunOperator(
         task_id="pmu_daily_insert_raw",
         trigger_dag_id="pmu_daily_insert_raw",
-        wait_for_completion=False,
+        wait_for_completion=True,
         poke_interval=30,
         allowed_states=["success"],
         failed_states=["failed"],
@@ -57,7 +58,7 @@ def pmu_daily_call():
     pmu_dbt_raw_to_intermediate = TriggerDagRunOperator(
         task_id="pmu_dbt_raw_to_intermediate",
         trigger_dag_id="pmu_dbt_raw_to_intermediate",
-        wait_for_completion=False,
+        wait_for_completion=True,
         poke_interval=30,
         allowed_states=["success"],
         failed_states=["failed"],
@@ -68,7 +69,7 @@ def pmu_daily_call():
     pmu_dbt_int_to_mart = TriggerDagRunOperator(
         task_id="pmu_dbt_int_to_mart",
         trigger_dag_id="pmu_dbt_int_to_mart",
-        wait_for_completion=False,
+        wait_for_completion=True,
         poke_interval=30,
         allowed_states=["success"],
         failed_states=["failed"],

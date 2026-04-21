@@ -8,8 +8,7 @@ WITH courses AS (
     SELECT * FROM {{ ref('int_pmu__course') }}
 
     {% if is_incremental() %}
-        {{ log("Dans if") }}
-        WHERE course_date = '{{ var("current_date", modules.datetime.date.today() | string) }}'::DATE
+        WHERE date_str = '{{ var("current_date", modules.datetime.date.today() | string) }}'
     {% endif %}
 ),
 
@@ -68,4 +67,4 @@ SELECT
     -- p.ingested_at     as participant_ingested_at
 
 FROM participants p 
-LEFT JOIN courses c USING(course_id_naturel)
+LEFT JOIN courses c ON USING(course_id_naturel)
