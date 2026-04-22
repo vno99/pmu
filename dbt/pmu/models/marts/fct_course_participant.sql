@@ -67,4 +67,4 @@ SELECT
     -- p.ingested_at     as participant_ingested_at
 
 FROM participants p 
-LEFT JOIN courses c ON USING(course_id_naturel)
+LEFT JOIN courses c USING(course_id_naturel)

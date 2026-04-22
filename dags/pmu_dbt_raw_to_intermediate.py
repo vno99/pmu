@@ -19,6 +19,7 @@ STEPS = {
      description="Exécute les modèles dbt de staging puis d'intermediate, avec les tests associés, à partir des données PMU de la couche raw",
      default_args=default_args, 
      catchup=False,
+     max_active_runs=1,
      tags=["pmu", "dbt"],
      params={
          "current_date": Param(
