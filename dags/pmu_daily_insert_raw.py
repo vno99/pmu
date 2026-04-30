@@ -147,6 +147,7 @@ def pmu_daily_insert_raw():
 
     @task(task_id="load_raw_courses")
     def load_raw_courses(a_date):
+        a_date = a_date["current_date"]
         logger.info(f"Traitement des courses pour {a_date}")
         return load_json_folder_to_raw(
             a_date,
@@ -156,6 +157,7 @@ def pmu_daily_insert_raw():
     
     @task(task_id="load_raw_participants")
     def load_raw_participants(a_date):
+        a_date = a_date["current_date"]
         logger.info(f"Traitement des participants pour {a_date}")
         return load_json_folder_to_raw(
             a_date,
