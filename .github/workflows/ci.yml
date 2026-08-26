@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  pytest:
+    name: pytest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install pytest "apache-airflow==3.1.8" psycopg2-binary requests fastapi pydantic python-dotenv sqlalchemy mlflow lightgbm
+
+      - name: Run tests
+        run: pytest -q
+
+  dbt:
+    name: dbt
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: data_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DBT_HOST: localhost
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install dbt and psql client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+          pip install --upgrade pip
+          pip install dbt-core==1.11.7 dbt-postgres==1.10.0
+
+      - name: Create raw and prediction tables
+        run: |
+          PGPASSWORD=password psql -h localhost -U user -d data_db -v ON_ERROR_STOP=1 -f sql/create_raw_tables.sql
+          PGPASSWORD=password psql -h localhost -U user -d data_db -v ON_ERROR_STOP=1 -f sql/create_predictions_table.sql
+
+      - name: dbt build
+        run: dbt build --project-dir dbt/pmu --profiles-dir dbt/pmu

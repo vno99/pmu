@@ -43,3 +43,26 @@ sources:
           - name: ingested_at
             tests:
               - not_null
+
+  - name: analytics_marts
+    description: "Tables écrites par le pipeline d'inférence (API FastAPI)"
+    schema: analytics_marts
+    tables:
+      - name: dim_prediction
+        description: "Prédictions stockées par le DAG pmu_daily_predict"
+        columns:
+          - name: race_id
+            tests:
+              - not_null
+          - name: horse_id
+            tests:
+              - not_null
+          - name: prediction_date
+            tests:
+              - not_null
+          - name: model_run
+            tests:
+              - not_null
+          - name: pred_score
+            tests:
+              - not_null

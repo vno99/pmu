@@ -4,7 +4,7 @@ from datetime import datetime
 from airflow.providers.standard.operators.bash import BashOperator
 from airflow.sdk import Param, dag, task
 
-from services.api_pmu import _get_dates
+from services.service_pmu import _get_dates
 
 default_args = {
     "owner": "airflow",
@@ -54,8 +54,8 @@ def pmu_daily_dbt_int_to_mart():
         bash_command=f"dbt test {DBT_DIR} --select {STEPS['marts']} --vars '{dbt_vars}'"
     )
 
-    current_date = start()
+    start_task = start()
 
-    current_date >> dbt_run_marts >> dbt_test_marts
+    start_task >> dbt_run_marts >> dbt_test_marts
 
 pmu_daily_dbt_int_to_mart()

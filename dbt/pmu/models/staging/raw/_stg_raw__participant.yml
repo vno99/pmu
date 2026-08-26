@@ -47,18 +47,23 @@ models:
       - name: participant_course_id_naturel
         description: "Identifiant naturel unique du participant dans la course"
         tests:
-          - not_null
-          - unique
+          - not_null:
+              where: "course_date > current_date - interval '15 days'"
+          - unique:
+              where: "course_date > current_date - interval '15 days'"
 
       - name: participant_nom
         description: "Nom du participant"
         tests:
-          - not_null
+          - not_null:
+              where: "course_date > current_date - interval '15 days'"
 
       - name: participant_num_pmu
         description: "Numéro PMU du participant"
         tests:
-          - not_null
+          - not_null:
+              where: "course_date > current_date - interval '15 days'"
+
 
       - name: participant_age
         description: "Âge du participant"

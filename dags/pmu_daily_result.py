@@ -8,7 +8,7 @@ local_tz = tz.gettz("Europe/Paris")
 
 default_args = {
     "owner": "airflow",
-    "start_date": datetime(2026, 4, 1, tzinfo=local_tz),
+    "start_date": datetime(2026, 4, 1, 2, 0, tzinfo=local_tz),
 }
 
 @dag(dag_id="pmu_daily_result",

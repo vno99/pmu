@@ -57,7 +57,7 @@ def predict(current_date):
         logger.error("Réponse API vide")
         raise AirflowSkipException("Aucune prédiction reçue de l'API")
 
-    logger.info(f"Reception de {data["count"]} prévisions")
+    logger.info(f"Reception de {data['count']} prévisions")
 
     return data
 
@@ -81,7 +81,7 @@ def save_predictions_to_db(ti):
         logger.info("La liste des predictions est vide")
         return
 
-    logger.info(f"Traitement de {predictions_data["count"]} previsions...")
+    logger.info(f"Traitement de {predictions_data['count']} previsions...")
     prediction_date = datetime.strptime(predictions_data["course_date"], '%d%m%Y').date()
 
     rows_to_insert = []
