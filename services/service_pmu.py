@@ -1,7 +1,7 @@
 import json
 import logging
 import time
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 
 import requests
 
@@ -13,37 +13,54 @@ logging.basicConfig(
 
 API_HOST = "https://online.turfinfo.api.pmu.fr/"
 API_URL = "rest/client/61/programme/"
-LISTE_PARTICIPANTS_COURSE = ""
 
 OUTPUT_DIR = "/data/pmu/"
 
 STR_DATE_FORMAT_OUTPUT = "%d%m%Y"
 FILE_DATE_FORMAT_OUTPUT = "%Y%m%d"
+ISO_DATE_FORMAT = "%Y-%m-%d"
 
-def _get_dates(une_date):
-    now = datetime.now()
+def normalize_date(une_date) -> date:
+    """Normalise une date d'entrée vers un ``datetime.date``.
 
-    if une_date in (None, "None", "null", ""):
-        date_obj = now
-    elif isinstance(une_date, datetime) :
-        date_obj = une_date
-    elif isinstance(une_date, str):
+    - ``None`` / ``""`` / ``"None"`` / ``"null"`` → date du jour (param de DAG vide).
+    - ``datetime`` / ``date`` → sa composante date.
+    - ``str`` → format ISO ``YYYY-MM-DD`` (ex : ``2026-04-15``).
+
+    Lève ``ValueError`` pour toute autre entrée : plutôt qu'un repli silencieux
+    sur la date du jour (qui masquait les erreurs de saisie), on échoue fort.
+    """
+    if une_date in (None, "", "None", "null"):
+        return datetime.now().date()
+    if isinstance(une_date, datetime):
+        return une_date.date()
+    if isinstance(une_date, date):
+        return une_date
+    if isinstance(une_date, str):
         try:
-            date_obj = datetime.strptime(une_date, STR_DATE_FORMAT_OUTPUT)
+            parsed = datetime.strptime(une_date, ISO_DATE_FORMAT)
+            is_strict = parsed.strftime(ISO_DATE_FORMAT) == une_date
         except (ValueError, TypeError):
-            logging.error(f"Format de date invalide {une_date}")
+            is_strict = False
+        if not is_strict:
+            logging.error(f"Format de date ISO invalide : {une_date!r}")
+            raise ValueError(
+                f"Format de date ISO attendu (YYYY-MM-DD), reçu : {une_date!r}"
+            ) from None
+        return parsed.date()
+    logging.error(f"Type de date non supporté : {type(une_date).__name__}")
+    raise ValueError(f"Type de date non supporté : {type(une_date).__name__}")
 
-            date_obj = now
-    else:
-        date_obj = now
 
-    return (date_obj.strftime(STR_DATE_FORMAT_OUTPUT), date_obj.strftime(FILE_DATE_FORMAT_OUTPUT))
+def _file_date(une_date) -> str:
+    """Format YYYYMMDD utilisé dans les noms de fichiers JSON (contrat stockage)."""
+    return normalize_date(une_date).strftime(FILE_DATE_FORMAT_OUTPUT)
 
 
 def fetch_course_pmu(une_date):
-    str_date, date_filename = _get_dates(une_date)
-    api_url = f"{API_HOST}{API_URL}{str_date}"
-    filename = f"{OUTPUT_DIR}course/{date_filename}_course.json"
+    date_obj = normalize_date(une_date)
+    api_url = f"{API_HOST}{API_URL}{date_obj.strftime(STR_DATE_FORMAT_OUTPUT)}"
+    filename = f"{OUTPUT_DIR}course/{date_obj.strftime(FILE_DATE_FORMAT_OUTPUT)}_course.json"
 
     logging.info(f"fetch_course_pmu - request : {api_url}")
 
@@ -66,9 +83,9 @@ def fetch_course_pmu(une_date):
 
 
 def fetch_participants_pmu(num_reunion, num_course, une_date):
-    str_date, date_filename = _get_dates(une_date)
-    api_url = f"{API_HOST}{API_URL}{str_date}/R{num_reunion}/C{num_course}/participants"
-    filename = f"{OUTPUT_DIR}participant/{date_filename}_participant_r{num_reunion}_c{num_course}.json"
+    date_obj = normalize_date(une_date)
+    api_url = f"{API_HOST}{API_URL}{date_obj.strftime(STR_DATE_FORMAT_OUTPUT)}/R{num_reunion}/C{num_course}/participants"
+    filename = f"{OUTPUT_DIR}participant/{date_obj.strftime(FILE_DATE_FORMAT_OUTPUT)}_participant_r{num_reunion}_c{num_course}.json"
 
     logging.info(f"fetch_participants - request : {api_url}")
 
@@ -89,7 +106,7 @@ def fetch_participants_pmu(num_reunion, num_course, une_date):
     logging.info(f"fetch_participants - write file : {filename}")
 
 def _get_reunions_courses(une_date):
-    _, date_filename = _get_dates(une_date)
+    date_filename = _file_date(une_date)
     list_res = []
 
     with open(f"{OUTPUT_DIR}course/{date_filename}_course.json", "r") as f:
@@ -118,7 +135,6 @@ def _get_full_data_from(start_date_var="09032013"):
     current_date = start_date
 
     while current_date <= end_date:
-        # str_date, date_filename = _get_dates(current_date)
         fetch_course_pmu(current_date)
         time.sleep(0.15)
 
@@ -137,9 +153,9 @@ def _get_full_data_from(start_date_var="09032013"):
         # time.sleep(0.5)
         
 
-def _get_data(current_date: str, **context):
-    if current_date in ["None", "null", ""]:
-        current_date = context["logical_date"].strftime(STR_DATE_FORMAT_OUTPUT)
+def _get_data(current_date=None, **context):
+    if current_date in (None, "", "None", "null"):
+        current_date = context["logical_date"].date().isoformat()
 
     fetch_course_pmu(current_date)
     time.sleep(0.15)
@@ -151,7 +167,3 @@ def _get_data(current_date: str, **context):
 
         fetch_participants_pmu(num_reunion, num_course, current_date)
         time.sleep(0.15)
-
-
-# if __name__ == "__main__":
-#     _get_full_data_from("14082025")

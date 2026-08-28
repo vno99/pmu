@@ -26,15 +26,15 @@ def _expected_api_url():
 # --- predict ---
 
 def test_predict_success():
-    payload = {"count": 1, "course_date": "15042026", "prediction": [{"race_id": 1}]}
+    payload = {"count": 1, "course_date": "2026-04-15", "prediction": [{"race_id": 1}]}
     with mock.patch("dags.pmu_daily_predict.requests.post",
                     return_value=_fake_response(payload)) as mock_post:
-        result = d.predict("15042026")
+        result = d.predict("2026-04-15")
 
     assert result == payload
     mock_post.assert_called_once_with(
         _expected_api_url(),
-        json={"input": "15042026"},
+        json={"input": "2026-04-15"},
         timeout=60,
     )
 
@@ -43,14 +43,14 @@ def test_predict_timeout_raises():
     with mock.patch("dags.pmu_daily_predict.requests.post",
                     side_effect=requests.exceptions.Timeout()):
         with pytest.raises(requests.exceptions.Timeout):
-            d.predict("15042026")
+            d.predict("2026-04-15")
 
 
 def test_predict_http_error_raises():
     with mock.patch("dags.pmu_daily_predict.requests.post",
                     side_effect=requests.exceptions.HTTPError("boom")):
         with pytest.raises(requests.exceptions.HTTPError):
-            d.predict("15042026")
+            d.predict("2026-04-15")
 
 
 @pytest.mark.parametrize("payload", [None, {}, {"prediction": []}])
@@ -58,7 +58,7 @@ def test_predict_empty_response_skips(payload):
     with mock.patch("dags.pmu_daily_predict.requests.post",
                     return_value=_fake_response(payload)):
         with pytest.raises(AirflowSkipException):
-            d.predict("15042026")
+            d.predict("2026-04-15")
 
 
 # --- save_predictions_to_db ---
@@ -66,7 +66,7 @@ def test_predict_empty_response_skips(payload):
 def _success_predictions():
     return {
         "count": 2,
-        "course_date": "15042026",
+        "course_date": "2026-04-15",
         "prediction": [
             {"race_id": 1, "horse_id": 5, "participant_num_pmu": 3, "pred_score": 0.9, "model_run": "run-1"},
             {"race_id": 1, "horse_id": 6, "participant_num_pmu": 4, "pred_score": 0.8, "model_run": "run-1"},

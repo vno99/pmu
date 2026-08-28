@@ -29,7 +29,7 @@ default_args = {
          "current_date": Param(
             default=None,
             type=["string", "null"],
-            description="Date (DDMMYYYY). Si vide, utilise la date du DAG run."
+            description="Date (YYYY-MM-DD). Si vide, utilise la date du DAG run."
         )
      }
      )

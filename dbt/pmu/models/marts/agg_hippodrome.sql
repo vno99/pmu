@@ -15,7 +15,7 @@ SELECT
 
     -- volumes
     count(DISTINCT c.course_id_naturel) AS nb_courses,
-    count(DISTINCT date_str) AS nb_jours_course,
+    count(DISTINCT c.course_date) AS nb_jours_course,
     count(*) AS nb_participations,
 
     -- partants

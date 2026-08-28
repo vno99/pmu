@@ -1,38 +1,54 @@
 import json
-from datetime import datetime
+from datetime import date, datetime
 from unittest import mock
 
 import pytest
 import requests
 
 from services.service_pmu import (
+    _file_date,
     _get_data,
-    _get_dates,
     _get_reunions_courses,
     fetch_course_pmu,
     fetch_participants_pmu,
+    normalize_date,
 )
 
-STR_DATE_FORMAT_OUTPUT = "%d%m%Y"
-FILE_DATE_FORMAT_OUTPUT = "%Y%m%d"
-NOW = datetime.now()
-now_str_date = NOW.strftime(STR_DATE_FORMAT_OUTPUT)
-now_date_filename = NOW.strftime(FILE_DATE_FORMAT_OUTPUT)
+TODAY = datetime.now().date()
 
-test_get_dates_data = [
-    (None, now_str_date, now_date_filename),
-    ("", now_str_date, now_date_filename),
-    ("15042026", "15042026", "20260415"),
-    ("2026", now_str_date, now_date_filename),
-    ("20260415", now_str_date, now_date_filename),
-]
 
-@pytest.mark.parametrize("une_date, expected_str_date, expected_date_filename", test_get_dates_data)
-def test_get_dates(une_date, expected_str_date, expected_date_filename):
-    str_date, date_filename = _get_dates(une_date)
+@pytest.mark.parametrize("une_date, expected", [
+    (None, TODAY),
+    ("", TODAY),
+    ("None", TODAY),
+    ("null", TODAY),
+    ("2026-04-15", date(2026, 4, 15)),
+    ("2026-12-31", date(2026, 12, 31)),
+])
+def test_normalize_date(une_date, expected):
+    assert normalize_date(une_date) == expected
 
-    assert str_date == expected_str_date
-    assert date_filename == expected_date_filename
+
+@pytest.mark.parametrize("une_date", [
+    "15042026",    # format inversé (jour 15 / mois 20)
+    "20260415",    # sans tirets
+    "2026-4-5",    # strptime accepte sans zéro → round-trip le rejette
+    "2026-13-01",  # 13e mois
+    "2026-04-32",  # 32 avril
+    "abc",
+])
+def test_normalize_date_invalid(une_date):
+    with pytest.raises(ValueError):
+        normalize_date(une_date)
+
+
+@pytest.mark.parametrize("une_date, expected", [
+    ("2026-04-15", "20260415"),
+    (date(2026, 4, 15), "20260415"),
+    (datetime(2026, 4, 15, 10, 30), "20260415"),
+])
+def test_file_date(une_date, expected):
+    assert _file_date(une_date) == expected
 
 
 def _fake_response(payload, status_error=None):
@@ -54,7 +70,7 @@ def test_fetch_course_pmu_writes_json(tmp_path):
 
     with mock.patch("services.service_pmu.OUTPUT_DIR", str(tmp_path) + "/"), \
          mock.patch("services.service_pmu.requests.get", return_value=_fake_response(payload)) as mock_get:
-        fetch_course_pmu("15042026")
+        fetch_course_pmu("2026-04-15")
 
     output_file = tmp_path / "course" / "20260415_course.json"
     assert output_file.exists()
@@ -75,7 +91,7 @@ def test_fetch_course_pmu_http_error_no_file(tmp_path):
              return_value=_fake_response(None, status_error=requests.exceptions.HTTPError("boom")),
          ):
         with pytest.raises(requests.exceptions.HTTPError):
-            fetch_course_pmu("15042026")
+            fetch_course_pmu("2026-04-15")
 
     assert not list((tmp_path / "course").iterdir())
 
@@ -88,7 +104,7 @@ def test_fetch_participants_pmu_writes_json(tmp_path):
 
     with mock.patch("services.service_pmu.OUTPUT_DIR", str(tmp_path) + "/"), \
          mock.patch("services.service_pmu.requests.get", return_value=_fake_response(payload)) as mock_get:
-        fetch_participants_pmu(1, 2, "15042026")
+        fetch_participants_pmu(1, 2, "2026-04-15")
 
     output_file = tmp_path / "participant" / "20260415_participant_r1_c2.json"
     assert output_file.exists()
@@ -116,7 +132,7 @@ def test_get_reunions_courses_parses(tmp_path):
     (course_dir / "20260415_course.json").write_text(json.dumps(programme), encoding="utf-8")
 
     with mock.patch("services.service_pmu.OUTPUT_DIR", str(tmp_path) + "/"):
-        assert _get_reunions_courses("15042026") == [(1, 2), (1, 3), (4, 5)]
+        assert _get_reunions_courses("2026-04-15") == [(1, 2), (1, 3), (4, 5)]
 
 
 # --- _get_data ---
@@ -127,15 +143,15 @@ def test_get_data_orchestrates(tmp_path):
 
     with mock.patch("services.service_pmu.OUTPUT_DIR", str(tmp_path) + "/"), \
          mock.patch("services.service_pmu.fetch_course_pmu") as mock_fetch_course, \
-         mock.patch("services.service_pmu._get_reunions_courses", return_value=[(1, 2), (1, 3)]) as mock_reunions, \
+         mock.patch("services.service_pmu._get_reunions_courses", return_value=[(1, 2), (1, 3)]), \
          mock.patch("services.service_pmu.fetch_participants_pmu") as mock_fetch_participants, \
          mock.patch("services.service_pmu.time.sleep"):
-        _get_data("15042026")
+        _get_data("2026-04-15")
 
-    mock_fetch_course.assert_called_once_with("15042026")
+    mock_fetch_course.assert_called_once_with("2026-04-15")
     assert mock_fetch_participants.call_args_list == [
-        mock.call(1, 2, "15042026"),
-        mock.call(1, 3, "15042026"),
+        mock.call(1, 2, "2026-04-15"),
+        mock.call(1, 3, "2026-04-15"),
     ]
 
 
@@ -150,4 +166,4 @@ def test_get_data_uses_logical_date_when_param_empty(tmp_path):
          mock.patch("services.service_pmu.time.sleep"):
         _get_data("None", logical_date=datetime(2026, 4, 15))
 
-    mock_fetch_course.assert_called_once_with("15042026")
+    mock_fetch_course.assert_called_once_with("2026-04-15")

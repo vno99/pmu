@@ -16,8 +16,7 @@ reunions AS (
         file_hash,
         ingested_at,
         date_str,
-        to_date(date_str, 'YYYYMMDD')::text AS course_date,
-        -- to_timestamp((programme_date + programme_timezone_offset) / 1000.0)::date as programme_date_dt,
+        to_date(date_str, 'YYYYMMDD')::date AS course_date,
         jsonb_array_elements(json_data -> 'programme' -> 'reunions') AS reunion
     FROM source
 ),
@@ -31,7 +30,6 @@ courses AS (
         date_str,
         course_date,
         reunion,
-        -- programme_date_dt,
         jsonb_array_elements(reunion -> 'courses') AS course
     FROM reunions
 )
@@ -42,6 +40,7 @@ SELECT
     file_hash,
     ingested_at,
     date_str,
+    course_date,
     (reunion ->> 'numOfficiel')::int AS reunion_num_officiel,
     (reunion ->> 'numExterne')::int AS reunion_num_externe,
     reunion ->> 'nature' AS reunion_nature,
@@ -86,6 +85,6 @@ SELECT
     (course ->> 'hasEParis')::boolean AS course_has_eparis,
     course -> 'paris' AS course_paris_json,
     course -> 'ordreArrivee' AS course_ordre_arrivee_json,
-    concat(course_date, '_R', course ->> 'numReunion', 'C', course ->> 'numOrdre') AS course_id_naturel,
+    concat(date_str, '_R', course ->> 'numReunion', 'C', course ->> 'numOrdre') AS course_id_naturel,
     course AS course_json
 FROM courses

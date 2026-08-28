@@ -19,33 +19,34 @@ os.environ.setdefault("RUN_ID", "test-run-id")
 import api.app
 
 
-# --- is_valid_ddmmyyyy ---
+# --- is_valid_iso_date ---
 
-@pytest.mark.parametrize("valid", ["15042026", "01012000", "31122026"])
-def test_is_valid_ddmmyyyy_accepts(valid):
-    assert api.app.is_valid_ddmmyyyy(valid) is True
+@pytest.mark.parametrize("valid", ["2026-04-15", "2000-01-01", "2026-12-31"])
+def test_is_valid_iso_date_accepts(valid):
+    assert api.app.is_valid_iso_date(valid) is True
 
 
 @pytest.mark.parametrize("invalid", [
-    "20260415",   # format inversé (jour 20 / mois 26)
-    "31022026",   # 31 février
-    "1504202",    # trop court
-    "150420266",  # trop long
+    "15042026",   # format inversé (jour 15 / mois 20)
+    "20260415",   # sans tirets
+    "2026-4-5",   # strptime accepte sans zéro → round-trip le rejette
+    "2026-13-01", # 13e mois
+    "2026-04-32", # 32 avril
     "abc",
     "",
 ])
-def test_is_valid_ddmmyyyy_rejects(invalid):
-    assert api.app.is_valid_ddmmyyyy(invalid) is False
+def test_is_valid_iso_date_rejects(invalid):
+    assert api.app.is_valid_iso_date(invalid) is False
 
 
 # --- PredictRequest ---
 
 def test_predict_request_valid():
-    request = api.app.PredictRequest(input="15042026")
-    assert request.input == "15042026"
+    request = api.app.PredictRequest(input="2026-04-15")
+    assert request.input == "2026-04-15"
 
 
-@pytest.mark.parametrize("invalid", ["20260415", "aaaa", ""])
+@pytest.mark.parametrize("invalid", ["20260415", "15042026", "aaaa", ""])
 def test_predict_request_invalid(invalid):
     with pytest.raises(ValidationError):
         api.app.PredictRequest(input=invalid)

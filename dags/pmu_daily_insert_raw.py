@@ -11,7 +11,7 @@ from airflow.task.trigger_rule import TriggerRule
 from psycopg2 import sql
 from psycopg2.extras import Json, execute_values
 
-from services.service_pmu import _get_dates
+from services.service_pmu import _file_date
 
 default_args = {
     "owner": "airflow",
@@ -53,7 +53,7 @@ def build_insert_query(table_name: str, cursor, schema_name="raw") -> str:
 
 
 def load_json_folder_to_raw(une_date, folder: Path, table_name: str) -> dict:
-    _, date_filename = _get_dates(une_date)
+    date_filename = _file_date(une_date)
     hook = PostgresHook(postgres_conn_id=DB_CONN_ID)
 
     files_seen = 0
@@ -127,7 +127,7 @@ def load_json_folder_to_raw(une_date, folder: Path, table_name: str) -> dict:
          "current_date": Param(
              default=None,
              type=["string", "null"],
-            description="Date des données à récupérer (DDMMYYYY)"
+            description="Date des données à récupérer (YYYY-MM-DD)"
          )
      }
      )
@@ -138,12 +138,10 @@ def pmu_daily_insert_raw():
         current_date = (
             context["params"].get("current_date")
             or context["dag_run"].conf.get("current_date")
-            or context["logical_date"].strftime("%d%m%Y")
+            or context["logical_date"].date().isoformat()
         )
         logging.info(f"Date résolue : {current_date}")
-
-        date_str, _ = _get_dates(current_date)
-        return {"current_date": date_str}
+        return {"current_date": current_date}
 
     @task(task_id="load_raw_courses")
     def load_raw_courses(a_date):

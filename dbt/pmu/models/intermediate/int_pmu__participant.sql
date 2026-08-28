@@ -1,14 +1,17 @@
+{# 'fail' déclenche un faux positif : dbt-postgres crée les colonnes string en
+   'varchar' alors que la vue source les expose en 'text' (types équivalents en
+   PostgreSQL). 'append_new_columns' conserve la détection des colonnes ajoutées. #}
 {{ config(
     materialized='incremental',
     unique_key=['participant_course_id_naturel'],
-    on_schema_change='fail'
+    on_schema_change='append_new_columns'
 ) }}
 
 WITH src AS (
     SELECT * FROM {{ ref('stg_raw__participant') }}
 
     {% if is_incremental() %}
-        WHERE course_date = '{{ var("current_date", modules.datetime.date.today() | string) }}'::DATE
+        WHERE {{ filter_course_date() }}
     {% endif %}
 ),
 

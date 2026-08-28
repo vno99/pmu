@@ -1,14 +1,17 @@
+{# 'fail' déclenche un faux positif : dbt-postgres crée les colonnes string en
+   'varchar' alors que la vue source les expose en 'text' (types équivalents en
+   PostgreSQL). 'append_new_columns' conserve la détection des colonnes ajoutées. #}
 {{ config(
     materialized='incremental',
     unique_key=['course_id', 'participant_id_cheval'],
-    on_schema_change='fail'
+    on_schema_change='append_new_columns'
 ) }}
 
 WITH courses AS (
     SELECT * FROM {{ ref('int_pmu__course') }}
 
     {% if is_incremental() %}
-        WHERE date_str = '{{ var("current_date", modules.datetime.date.today() | string) }}'
+        WHERE {{ filter_course_date() }}
     {% endif %}
 ),
 
@@ -16,7 +19,7 @@ participants AS (
     SELECT * FROM {{ ref('int_pmu__participant', info=True) }}
 
     {% if is_incremental() %}
-        WHERE course_date = '{{ var("current_date", modules.datetime.date.today() | string) }}'::DATE
+        WHERE {{ filter_course_date() }}
     {% endif %}
 )
 
@@ -29,10 +32,7 @@ SELECT
 
     -- dimensions participant
     p.participant_num_pmu,
-    -- p.participant_nom,
     p.participant_age,
-    -- p.participant_sexe,
-    -- p.participant_race,
     p.participant_entraineur,
     p.participant_driver,
     p.participant_driver_change,
@@ -40,8 +40,6 @@ SELECT
     p.participant_oeilleres,
     p.participant_musique,
     p.participant_statut,
-    -- p.reunion_num,
-    -- p.course_num_ordre         as participant_course_num_ordre,
 
     -- statistiques historiques
     p.participant_nombre_courses,
@@ -60,11 +58,5 @@ SELECT
     p.is_gagnant,
     p.is_top_3
 
-    -- traçabilité
-    -- c.source_file     as course_source_file,
-    -- c.ingested_at     as course_ingested_at,
-    -- p.source_file     as participant_source_file,
-    -- p.ingested_at     as participant_ingested_at
-
-FROM participants p 
+FROM participants p
 LEFT JOIN courses c USING(course_id_naturel)

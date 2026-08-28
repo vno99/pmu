@@ -88,7 +88,7 @@ def test_load_json_folder_upserts_two_files(tmp_path, mock_hook):
     file_a.write_text(json.dumps(content_a), encoding="utf-8")
     file_b.write_text(json.dumps(content_b), encoding="utf-8")
 
-    result = d.load_json_folder_to_raw("15042026", tmp_path, "raw_course")
+    result = d.load_json_folder_to_raw("2026-04-15", tmp_path, "raw_course")
 
     assert result["files_seen"] == 2
     assert result["rows_attempted"] == 2
@@ -119,7 +119,7 @@ def test_load_json_folder_upserts_two_files(tmp_path, mock_hook):
 def test_load_json_folder_empty_no_connection(tmp_path, mock_hook):
     mock_hook, mock_conn, mock_cur, mock_exec, mock_build = mock_hook
 
-    result = d.load_json_folder_to_raw("15042026", tmp_path, "raw_course")
+    result = d.load_json_folder_to_raw("2026-04-15", tmp_path, "raw_course")
 
     assert result == {"files_seen": 0, "rows_attempted": 0, "failed_files": 0}
     mock_hook.get_conn.assert_not_called()
@@ -131,7 +131,7 @@ def test_load_json_folder_invalid_json_counts_failure(tmp_path, mock_hook):
 
     (tmp_path / "20260415_bad.json").write_text("{ not valid json", encoding="utf-8")
 
-    result = d.load_json_folder_to_raw("15042026", tmp_path, "raw_course")
+    result = d.load_json_folder_to_raw("2026-04-15", tmp_path, "raw_course")
 
     assert result["files_seen"] == 1
     assert result["rows_attempted"] == 0

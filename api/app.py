@@ -41,7 +41,7 @@ RUN_ID = os.environ["RUN_ID"]
 SQL = """
 select *
 from analytics_marts.feature_store_horse_ranking_v3
-where course_date = to_date(%(course_date)s, 'DDMMYYYY')
+where course_date = %(course_date)s::date
   and race_id is not null
   and horse_id is not null
 order by course_date, course_heure_depart_ts, race_id, horse_id
@@ -74,28 +74,29 @@ app = FastAPI(
 
 )
 
-def is_valid_ddmmyyyy(date_str):
+def is_valid_iso_date(date_str):
+    """Valide un format de date ISO (YYYY-MM-DD), y compris l'existence réelle de la date."""
     try:
-        parsed = datetime.strptime(date_str, "%d%m%Y")
+        parsed = datetime.strptime(date_str, "%Y-%m-%d")
         # Reformate et compare à l'original
-        return parsed.strftime("%d%m%Y") == date_str
-    except ValueError:
+        return parsed.strftime("%Y-%m-%d") == date_str
+    except (ValueError, TypeError):
         return False
-    
+
 class PredictRequest(BaseModel):
     input: str
 
     @field_validator('input')
     @classmethod
     def validate_date(cls, value):
-        if not is_valid_ddmmyyyy(value):
-            raise ValueError("Format attendu: DDMMYYYY (ex: 15042026)")
+        if not is_valid_iso_date(value):
+            raise ValueError("Format attendu: YYYY-MM-DD (ex: 2026-04-15)")
         return value
 
     model_config = {
         "json_schema_extra": {
             "example": {
-                "input": "15042026"
+                "input": "2026-04-15"
             }
         }
     }
@@ -148,10 +149,6 @@ async def predict(request: PredictRequest):
 
     pred_result = df_selected_course[["race_id", "horse_id", "participant_num_pmu", "pred_score"]].sort_values(by=["race_id", "pred_score"], ascending=[True, False], na_position="last")
     pred_result["model_run"] = RUN_ID
-
-    # selected_date = pred_result.iloc[0]["race_id"][:10] if not pred_result.empty else None
-
-    # pred_result.to_csv(f"predi_{selected_date}.csv")
 
     now_utc = datetime.now(timezone.utc)
     iso_string = now_utc.isoformat()

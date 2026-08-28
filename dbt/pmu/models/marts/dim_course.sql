@@ -8,7 +8,6 @@ SELECT
     course_id_naturel,
 
     -- dimensions temporelles
-    date_str,
     course_date,
     course_heure_depart_ts,
 

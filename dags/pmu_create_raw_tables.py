@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
 from airflow.sdk import dag
 

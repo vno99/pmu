@@ -1,6 +1,6 @@
 import logging
 import os
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 
 import requests
 from airflow.exceptions import AirflowSkipException
@@ -9,7 +9,7 @@ from airflow.providers.standard.operators.python import PythonOperator
 from airflow.sdk import Param, dag
 from dateutil import tz
 
-from services.service_pmu import _get_dates
+from services.service_pmu import normalize_date
 
 local_tz = tz.gettz("Europe/Paris")
 
@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 def predict(current_date):
     api_url = f"{API_HOST}{API_URL}"
-    current_date, _ = _get_dates(current_date)
+    current_date = normalize_date(current_date).isoformat()
 
     logger.info(f"Appel API pour la date: {current_date}")
 
@@ -82,7 +82,7 @@ def save_predictions_to_db(ti):
         return
 
     logger.info(f"Traitement de {predictions_data['count']} previsions...")
-    prediction_date = datetime.strptime(predictions_data["course_date"], '%d%m%Y').date()
+    prediction_date = date.fromisoformat(predictions_data["course_date"])
 
     rows_to_insert = []
     for r in records:
@@ -127,7 +127,7 @@ def save_predictions_to_db(ti):
          "current_date": Param(
             default=None,
             type=["string", "null"],
-            description="Date (DDMMYYYY). Si vide, utilise la date du DAG run."
+            description="Date (YYYY-MM-DD). Si vide, utilise la date du DAG run."
         )
      }
      )

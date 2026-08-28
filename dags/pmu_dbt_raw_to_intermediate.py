@@ -3,8 +3,6 @@ import logging
 from airflow.providers.standard.operators.bash import BashOperator
 from airflow.sdk import Param, dag, task
 
-from services.service_pmu import _get_dates
-
 default_args = {
     "owner": "airflow",
 }
@@ -25,7 +23,7 @@ STEPS = {
          "current_date": Param(
              default=None,
              type=["string", "null"],
-            description="Date des données à récupérer (DDMMYYYY)"
+            description="Date des données à récupérer (YYYY-MM-DD)"
          )
      }
      )
@@ -36,12 +34,10 @@ def pmu_dbt_raw_to_intermediate():
         current_date = (
             context["params"].get("current_date")
             or context["dag_run"].conf.get("current_date")
-            or context["logical_date"].strftime("%d%m%Y")
+            or context["logical_date"].date().isoformat()
         )
         logging.info(f"Date résolue : {current_date}")
-
-        _, date_filename = _get_dates(current_date)
-        return {"current_date": date_filename}
+        return {"current_date": current_date}
     
     dbt_vars = "{{ ti.xcom_pull(task_ids='start') | tojson }}"
 

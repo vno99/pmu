@@ -10,14 +10,9 @@ models:
       materialized: table
     columns:
       - name: course_id_naturel
-        description: Clé primaire naturelle de la course (ex. 2026-03-31_R6C7)
+        description: Clé primaire naturelle de la course (ex. 20260331_R6C7)
         tests:
           - unique
-          - not_null
-
-      - name: date_str
-        description: Date de la course au format YYYYMMDD extrait du nom de fichier source
-        tests:
           - not_null
 
       - name: course_date

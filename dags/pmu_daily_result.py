@@ -22,7 +22,7 @@ def pmu_daily_result():
 
     @task(task_id="calcule_date")
     def calcule_date(**context):
-        return (context["logical_date"] - timedelta(days=1)).strftime("%d%m%Y")
+        return (context["logical_date"] - timedelta(days=1)).date().isoformat()
     
     trigger_pmu_daily_call = TriggerDagRunOperator(
         task_id="trigger_pmu_daily_call",
