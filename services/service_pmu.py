@@ -57,6 +57,20 @@ def _file_date(une_date) -> str:
     return normalize_date(une_date).strftime(FILE_DATE_FORMAT_OUTPUT)
 
 
+def resolve_dag_date(une_date, fallback_date):
+    """Résout la date d'un paramètre de DAG en filtrant les sentinelles vides.
+
+    Airflow propage un paramètre de date vide sous forme de chaîne ``"None"``
+    (rendu Jinja) à travers les ``conf`` des ``TriggerDagRunOperator``. Ces
+    sentinelles doivent être traitées comme « date absente » et repliées sur
+    ``fallback_date`` (typiquement le ``logical_date`` du run), plutôt que
+    transmises telles quelles à dbt (qui échouerait sur ``'None'::date``).
+    """
+    if une_date in (None, "", "None", "null"):
+        return fallback_date
+    return une_date
+
+
 def fetch_course_pmu(une_date):
     date_obj = normalize_date(une_date)
     api_url = f"{API_HOST}{API_URL}{date_obj.strftime(STR_DATE_FORMAT_OUTPUT)}"

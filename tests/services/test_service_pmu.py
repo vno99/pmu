@@ -12,6 +12,7 @@ from services.service_pmu import (
     fetch_course_pmu,
     fetch_participants_pmu,
     normalize_date,
+    resolve_dag_date,
 )
 
 TODAY = datetime.now().date()
@@ -49,6 +50,22 @@ def test_normalize_date_invalid(une_date):
 ])
 def test_file_date(une_date, expected):
     assert _file_date(une_date) == expected
+
+
+@pytest.mark.parametrize("une_date, fallback, expected", [
+    # Airflow rend None en chaîne "None" dans les templates / conf des
+    # TriggerDagRunOperator : ces sentinelles doivent replier sur la date de secours
+    # (le logical_date du run), jamais être transmises telles quelles à dbt.
+    (None, "2026-08-31", "2026-08-31"),
+    ("", "2026-08-31", "2026-08-31"),
+    ("None", "2026-08-31", "2026-08-31"),
+    ("null", "2026-08-31", "2026-08-31"),
+    # Une date réellement fournie est conservée, quelle que soit la date de secours.
+    ("2026-08-31", "2026-08-01", "2026-08-31"),
+    (date(2026, 8, 31), "2026-08-01", date(2026, 8, 31)),
+])
+def test_resolve_dag_date(une_date, fallback, expected):
+    assert resolve_dag_date(une_date, fallback) == expected
 
 
 def _fake_response(payload, status_error=None):

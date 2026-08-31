@@ -11,7 +11,7 @@ from airflow.task.trigger_rule import TriggerRule
 from psycopg2 import sql
 from psycopg2.extras import Json, execute_values
 
-from services.service_pmu import _file_date
+from services.service_pmu import _file_date, resolve_dag_date
 
 default_args = {
     "owner": "airflow",
@@ -135,10 +135,10 @@ def pmu_daily_insert_raw():
     
     @task(task_id="start")
     def start(**context):
-        current_date = (
+        current_date = resolve_dag_date(
             context["params"].get("current_date")
-            or context["dag_run"].conf.get("current_date")
-            or context["logical_date"].date().isoformat()
+            or context["dag_run"].conf.get("current_date"),
+            context["logical_date"].date().isoformat(),
         )
         logging.info(f"Date résolue : {current_date}")
         return {"current_date": current_date}
